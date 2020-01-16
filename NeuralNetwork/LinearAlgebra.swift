@@ -13,13 +13,19 @@ public protocol Field: Equatable {
     static func / (lhs: Self, rhs: Self) -> Self
     static func + (lhs: Self, rhs: Self) -> Self
     static func - (lhs: Self, rhs: Self) -> Self
+    static func / (lhs: Self, rhs: Int) -> Self
     static func random() -> Self
     func exponent() -> Self
     static var zero: Self { get }
     static var one: Self { get }
+    init(_ integer: Int)
 }
 
 extension Double: Field {
+    public static func / (lhs: Double, rhs: Int) -> Double {
+        return lhs / Double(rhs)
+    }
+
     static public func random() -> Double {
         return Double.random(in: 0...1)
     }
@@ -31,8 +37,6 @@ extension Double: Field {
     public static let zero: Double = 0.0
     public static var one: Double = 1.0
 }
-
-//public typealias Scalar = Double
 
 public struct Vector<Scalar: Field>: Equatable {
     let value: [Scalar]
@@ -53,6 +57,18 @@ public struct Vector<Scalar: Field>: Equatable {
         return Vector(value: zip(lhs.value, rhs.value).map { $0 + $1 })
     }
 
+    public static func -(lhs: Self, rhs: Self) -> Self {
+        return Vector(value: zip(lhs.value, rhs.value).map { $0 - $1 })
+    }
+
+    public static func *(lhs: Scalar, rhs: Self) -> Self {
+        return rhs.map { $0 * lhs }
+    }
+
+    public static func *(lhs: Self, rhs: Self) -> Self {
+        return Vector(value: zip(lhs.value, rhs.value).map { $0 * $1 })
+    }
+
     static func randn(_ d0: Int) -> Vector {
         return Vector(value: (0..<d0).map { _ in Scalar.random() })
 
@@ -60,6 +76,10 @@ public struct Vector<Scalar: Field>: Equatable {
 
     public static func ==(lhs: Vector, rhs: Vector) -> Bool {
         return lhs.value == rhs.value
+    }
+
+    static func zero<T: Field>(_ shape: Vector<T>) -> Vector<T> {
+        return Vector<T>(value: shape.value.map { _ in T.zero })
     }
 }
 
@@ -94,6 +114,30 @@ public struct Matrix<Scalar: Field>: Equatable {
     public static func ==(lhs: Matrix, rhs: Matrix) -> Bool {
         return lhs.value == rhs.value
     }
+
+    public static func +(lhs: Self, rhs: Self) -> Self {
+        let value = zip(lhs.value, rhs.value).map { zip($0, $1).map { $0 + $1} }
+        return Matrix(value: value)
+    }
+
+    public static func -(lhs: Self, rhs: Self) -> Self {
+        let value = zip(lhs.value, rhs.value).map { zip($0, $1).map { $0 - $1} }
+        return Matrix(value: value)
+    }
+
+    public static func *(lhs: Scalar, rhs: Self) -> Self {
+        return rhs.map { lhs * $0 }
+    }
+
+    static func zero<T: Field>(_ shape: Matrix<T>) -> Matrix<T> {
+        let value = shape.value.map { row in row.map { _ in T.zero } }
+        return Matrix<T>(value: value)
+    }
+
+    func transpose() -> Matrix<Scalar> {
+        let value = (0..<self.value[0].count).map { ix in self.value.map { $0[ix] } }
+        return Matrix<Scalar>(value: value)
+    }
 }
 
 public func /<Scalar: Field>(lhs: Scalar, rhs: Vector<Scalar>) -> Vector<Scalar> {
@@ -108,6 +152,10 @@ func exp<Scalar: Field>(_ list: Vector<Scalar>) -> Vector<Scalar> {
 
 public func +<Scalar: Field>(lhs: Scalar, rhs: Vector<Scalar>) -> Vector<Scalar> {
     return rhs.map { lhs + $0 }
+}
+
+public func -<Scalar: Field>(lhs: Scalar, rhs: Vector<Scalar>) -> Vector<Scalar> {
+    return rhs.map { lhs - $0 }
 }
 
 public func dot<Scalar: Field>(_ lhs: Vector<Scalar>, _ rhs: Vector<Scalar>) -> Scalar {
