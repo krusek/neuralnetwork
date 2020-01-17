@@ -1,0 +1,122 @@
+//
+//  FileTests.swift
+//  NeuralNetworkTests
+//
+//  Created by Korben Rusek on 1/16/20.
+//  Copyright © 2020 Korben Rusek. All rights reserved.
+//
+
+import XCTest
+import NeuralNetwork
+
+class FileTests: XCTestCase {
+
+    override func setUp() {
+        // Put setup code here. This method is called before the invocation of each test method in the class.
+    }
+
+    override func tearDown() {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+
+    let sevenString = """
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000001111110000000000000000
+0000001111111111111111000000
+0000001111111111111111000000
+0000000000011111111111000000
+0000000000000000001111000000
+0000000000000000011110000000
+0000000000000000011110000000
+0000000000000000111100000000
+0000000000000000111100000000
+0000000000000001111000000000
+0000000000000001110000000000
+0000000000000011110000000000
+0000000000000111100000000000
+0000000000001111100000000000
+0000000000001111000000000000
+0000000000011111000000000000
+0000000000011110000000000000
+0000000000111110000000000000
+0000000000111110000000000000
+0000000000111100000000000000
+0000000000000000000000000000
+"""
+
+    let expectedTwo = """
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000111111100000000000
+0000000001111111110000000000
+0000000011111111110000000000
+0000000111111011110000000000
+0000000111100011110000000000
+0000000011000011110000000000
+0000000000000111110000000000
+0000000000001111100000000000
+0000000000001111000000000000
+0000000000011111000000000000
+0000000000111110000000000000
+0000000000111100000000000000
+0000000001111100000000000000
+0000000011111000000000000000
+0000000011111000000000000000
+0000000011110000000000000000
+0000000011111111101111111110
+0000000011111111111111111110
+0000000011111111111111111110
+0000000001111111111110000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+"""
+
+    func testStreamCreate() {
+//        let path = "/Users/korbenrusek/Documents/code/neural/neuralnetwork/data/t10k-images-idx3-ubyte"
+//        let url = URL(fileURLWithPath: path)
+        guard let stream = NeuralNetwork.Stream("t10k-images-idx3-ubyte") else {
+            XCTFail()
+            return
+        }
+
+        XCTAssertEqual(stream.readInt(), 2051)
+        XCTAssertEqual(stream.readInt(), 10000)
+        let rows = stream.readInt()
+        let cols = stream.readInt()
+        let foundSeven = readStrings(stream: stream, rows: rows, cols: cols)
+        XCTAssertEqual(foundSeven, sevenString)
+        XCTAssertEqual(readStrings(stream: stream, rows: rows, cols: cols), expectedTwo)
+    }
+
+    func readStrings(stream: NeuralNetwork.Stream, rows: Int32, cols: Int32) -> String {
+        let strings = (0..<rows).map { _ in
+            (0..<cols).map { _ in "\(stream.readByte() != 0 ? 1 : 0)" }.joined()
+        }
+        return strings.joined(separator: "\n")
+
+    }
+
+    func testLabelsCreate() {
+        let labels = "t10k-labels-idx1-ubyte"
+        guard let stream = NeuralNetwork.Stream(labels) else {
+            XCTFail()
+            return
+        }
+
+        XCTAssertEqual(stream.readInt(), 2049)
+        XCTAssertEqual(stream.readInt(), 10000)
+        XCTAssertEqual(stream.readByte(), 7)
+        XCTAssertEqual(stream.readByte(), 2)
+    }
+
+}
