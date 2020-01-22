@@ -8,17 +8,19 @@
 
 import Foundation
 
-public protocol Field: Equatable {
+public protocol Field: Equatable, Comparable, CustomStringConvertible {
     static func * (lhs: Self, rhs: Self) -> Self
     static func / (lhs: Self, rhs: Self) -> Self
     static func + (lhs: Self, rhs: Self) -> Self
     static func - (lhs: Self, rhs: Self) -> Self
     static func / (lhs: Self, rhs: Int) -> Self
+    static func random(using random: inout SystemRandomNumberGenerator) -> Self
     static func random() -> Self
     func exponent() -> Self
     static var zero: Self { get }
     static var one: Self { get }
     init(_ integer: Int)
+    init(_ integer: UInt8)
 }
 
 extension Double: Field {
@@ -30,12 +32,23 @@ extension Double: Field {
         return Double.random(in: 0...1)
     }
 
+    public static func random(using random: inout SystemRandomNumberGenerator) -> Double {
+        return Double.random(in: 0...1, using: &random)
+    }
+
     public func exponent() -> Double {
         return exp(self)
     }
 
     public static let zero: Double = 0.0
     public static var one: Double = 1.0
+}
+
+extension Array where Element: Field {
+    func toString() -> String {
+        let value = self.map { "\($0)" }.joined(separator: ",")
+        return "[\(value)]"
+    }
 }
 
 public struct Vector<Scalar: Field>: Equatable {
@@ -69,9 +82,12 @@ public struct Vector<Scalar: Field>: Equatable {
         return Vector(value: zip(lhs.value, rhs.value).map { $0 * $1 })
     }
 
+    static func randn(_ d0: Int, using random: ScalarGenerator<Scalar>) -> Vector {
+        return Vector(value: (0..<d0).map { _ in random() })
+    }
+
     static func randn(_ d0: Int) -> Vector {
         return Vector(value: (0..<d0).map { _ in Scalar.random() })
-
     }
 
     public static func ==(lhs: Vector, rhs: Vector) -> Bool {
@@ -80,6 +96,12 @@ public struct Vector<Scalar: Field>: Equatable {
 
     static func zero<T: Field>(_ shape: Vector<T>) -> Vector<T> {
         return Vector<T>(value: shape.value.map { _ in T.zero })
+    }
+}
+
+extension Vector: CustomStringConvertible {
+    public var description: String {
+        return self.value.toString()
     }
 }
 
@@ -111,6 +133,10 @@ public struct Matrix<Scalar: Field>: Equatable {
         return Matrix(value: (0..<d0).map { _ in (0..<d1).map { _ in Scalar.random() } })
     }
 
+    static func randn(_ d0: Int, _ d1: Int, using random: ScalarGenerator<Scalar>) -> Matrix {
+        return Matrix(value: (0..<d0).map { _ in (0..<d1).map { _ in random() } })
+    }
+
     public static func ==(lhs: Matrix, rhs: Matrix) -> Bool {
         return lhs.value == rhs.value
     }
@@ -137,6 +163,13 @@ public struct Matrix<Scalar: Field>: Equatable {
     func transpose() -> Matrix<Scalar> {
         let value = (0..<self.value[0].count).map { ix in self.value.map { $0[ix] } }
         return Matrix<Scalar>(value: value)
+    }
+}
+
+extension Matrix: CustomStringConvertible {
+    public var description: String {
+        let strings = self.value.map { $0.toString() }
+        return strings.joined(separator: "\n")
     }
 }
 

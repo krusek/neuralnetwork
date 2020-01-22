@@ -82,9 +82,7 @@ class FileTests: XCTestCase {
 """
 
     func testStreamCreate() {
-//        let path = "/Users/korbenrusek/Documents/code/neural/neuralnetwork/data/t10k-images-idx3-ubyte"
-//        let url = URL(fileURLWithPath: path)
-        guard let stream = NeuralNetwork.Stream("t10k-images-idx3-ubyte") else {
+        guard let stream = NeuralNetwork.Stream.images(.t10k) else {
             XCTFail()
             return
         }
@@ -107,8 +105,7 @@ class FileTests: XCTestCase {
     }
 
     func testLabelsCreate() {
-        let labels = "t10k-labels-idx1-ubyte"
-        guard let stream = NeuralNetwork.Stream(labels) else {
+        guard let stream = NeuralNetwork.Stream.labels(.t10k) else {
             XCTFail()
             return
         }

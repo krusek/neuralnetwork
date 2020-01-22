@@ -12,6 +12,7 @@
 		0B0C6FB823C9877A004A9382 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B0C6FB723C9877A004A9382 /* Network.swift */; };
 		0B1ABEBB23D0B0C900901684 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1ABEBA23D0B0C900901684 /* File.swift */; };
 		0B1ABEBD23D0B50900901684 /* FileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1ABEBC23D0B50900901684 /* FileTests.swift */; };
+		0BCCF65D23D75D8B00DE43C7 /* NetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BCCF65C23D75D8B00DE43C7 /* NetworkTests.swift */; };
 		0BE0C77D23CD56AD00EFDDA7 /* LinearAlgebraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE0C77C23CD56AD00EFDDA7 /* LinearAlgebraTests.swift */; };
 		0BE0C77F23CD76F700EFDDA7 /* LinearAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE0C77E23CD76F700EFDDA7 /* LinearAlgebra.swift */; };
 /* End PBXBuildFile section */
@@ -35,6 +36,7 @@
 		0B0C6FB723C9877A004A9382 /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		0B1ABEBA23D0B0C900901684 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		0B1ABEBC23D0B50900901684 /* FileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTests.swift; sourceTree = "<group>"; };
+		0BCCF65C23D75D8B00DE43C7 /* NetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTests.swift; sourceTree = "<group>"; };
 		0BE0C77C23CD56AD00EFDDA7 /* LinearAlgebraTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearAlgebraTests.swift; sourceTree = "<group>"; };
 		0BE0C77E23CD76F700EFDDA7 /* LinearAlgebra.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearAlgebra.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -94,6 +96,7 @@
 				0B0C6FAD23C98748004A9382 /* Info.plist */,
 				0BE0C77C23CD56AD00EFDDA7 /* LinearAlgebraTests.swift */,
 				0B1ABEBC23D0B50900901684 /* FileTests.swift */,
+				0BCCF65C23D75D8B00DE43C7 /* NetworkTests.swift */,
 			);
 			path = neuralnetworkTests;
 			sourceTree = "<group>";
@@ -218,6 +221,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0BCCF65D23D75D8B00DE43C7 /* NetworkTests.swift in Sources */,
 				0BE0C77D23CD56AD00EFDDA7 /* LinearAlgebraTests.swift in Sources */,
 				0B1ABEBD23D0B50900901684 /* FileTests.swift in Sources */,
 			);

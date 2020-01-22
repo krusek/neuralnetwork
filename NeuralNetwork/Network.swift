@@ -17,21 +17,26 @@ public func sigmoidPrime<Scalar: Field>(_ list: Vector<Scalar>) -> Vector<Scalar
     return sigmoid(list) * diff
 }
 
-public typealias PhotoData = [Int]
+public typealias PhotoData = [UInt8]
 public typealias Output<Scalar: Field> = [Scalar]
 public typealias TestData<Scalar: Field> = [(PhotoData, Output<Scalar>)]
+public typealias ScalarGenerator<Scalar: Field> = () -> Scalar
 
 public class Network<Scalar: Field> {
     let sizes: [Int]
     let biases: [Vector<Scalar>]
     let weights: [Matrix<Scalar>]
-    init(sizes: [Int]) {
-        self.sizes = sizes
-        self.biases = sizes.dropFirst().map { Vector<Scalar>.randn($0) }
-        self.weights = zip(sizes.dropLast(), sizes.dropFirst()).map { Matrix<Scalar>.randn($0, $1) }
+    convenience public init(sizes: [Int]) {
+        self.init(sizes: sizes, generator: systemGenerator)
     }
 
-    init(sizes: [Int], biases: [Vector<Scalar>], weights: [Matrix<Scalar>]) {
+    public init(sizes: [Int], generator: ScalarGenerator<Scalar>) {
+        self.sizes = sizes
+        self.biases = sizes.dropFirst().map { Vector<Scalar>.randn($0, using: generator) }
+        self.weights = zip(sizes.dropLast(), sizes.dropFirst()).map { Matrix<Scalar>.randn($0, $1, using: generator) }
+    }
+
+    public init(sizes: [Int], biases: [Vector<Scalar>], weights: [Matrix<Scalar>]) {
         self.sizes = sizes
         self.biases = biases
         self.weights = weights
@@ -40,7 +45,6 @@ public class Network<Scalar: Field> {
     public func feedForward(_ a: Vector<Scalar>) -> Vector<Scalar> {
         return zip(biases, weights).reduce(a) { (a, arg1) -> Vector<Scalar> in
             let (b, w) = arg1
-
             let prod = w * a
             return sigmoid(prod + b)
         }
@@ -58,7 +62,7 @@ public class Network<Scalar: Field> {
                 network = network.updateMiniBatch(data[range], learningRate: learningRate)
             }
             if let testData = testData {
-                print("Epoch \(j): 0 / \(testData.count)")
+                print("Epoch \(j): \(evaluate(testData)) / \(testData.count)")
             } else {
                 print("Epoch \(j) complete")
             }
@@ -87,7 +91,7 @@ public class Network<Scalar: Field> {
     private func backprop(_ data: PhotoData, _ expected: Output<Scalar>) -> ([Vector<Scalar>], [Matrix<Scalar>]) {
         var nabla_b = self.biases.map { Vector<Scalar>.zero($0) }
         var nabla_w = self.weights.map { Matrix<Scalar>.zero($0) }
-        var activation = Vector<Scalar>(value: data.map { Scalar($0) })
+        var activation = Vector<Scalar>(value: data.map { Scalar(Int($0)) })
         var activations: [Vector<Scalar>] = [activation]
         var zs: [Vector<Scalar>] = []
         for (b, w) in zip(biases, weights) {
@@ -116,7 +120,28 @@ public class Network<Scalar: Field> {
         return Matrix<Scalar>(value)
     }
 
+    private func evaluate(_ test_data: TestData<Scalar>) -> Int {
+        var correct = 0
+        for (x, y) in test_data {
+            let xx = Vector<Scalar>(value: x.map{Scalar($0)})
+            let forward = self.feedForward(xx)
+            if let fx = mxIndex(forward.value), let my = mxIndex(y), fx == my {
+                correct += 1
+            }
+        }
+        return correct
+    }
+
+    private func mxIndex<X: Comparable>(_ array: [X]) -> Int? {
+        guard let mx = array.max(), let first = array.firstIndex(of: mx) else { return nil }
+        return first
+    }
+
     private func costDerivative(activation: Vector<Scalar>, expected: Output<Scalar>) -> Vector<Scalar> {
         return activation - Vector<Scalar>(value: expected)
     }
+}
+
+func systemGenerator<Scalar: Field>() -> Scalar {
+    return Scalar.random()
 }
